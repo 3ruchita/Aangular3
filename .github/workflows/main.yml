@@ -10,22 +10,36 @@ on:
 
 jobs:
   build:
+  
     runs-on: ubuntu-latest
+    node-version: 18
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '14.x'
+          node-version: '18.x'
+
+      - name: Install latest Chrome
+        run: |
+          sudo apt update
+          sudo apt --only-upgrade install google-chrome-stable
+          google-chrome --version
 
       - name: Install dependencies
         run: npm install
 
+  test:
+
       - name: Run tests
         run: npm run test
 
-      - name: Build Angular project
-        run: npm run build
+      - name: Run integration tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          install: false
+          wait-on: http://localhost:4200

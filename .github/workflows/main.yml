@@ -1,42 +1,30 @@
-name: CI
+name: Angular
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   build:
-  
+    name: Build and Test
     runs-on: ubuntu-latest
-    node-version: 18
-
+    strategy:
+      matrix:
+        node-version: [18, 20]
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - name: Use Node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-
+          node-version: ${{ matrix.node-version }}
       - name: Install latest Chrome
         run: |
           sudo apt update
           sudo apt --only-upgrade install google-chrome-stable
           google-chrome --version
-
       - name: Install dependencies
-        run: npm install
-
-  test:
-
-      - name: Run tests
-        run: npm run test
-
+        run: npm ci
+      - name: Run unit tests
+        run: xvfb-run npm test -- --watch=false
       - name: Run integration tests
         uses: cypress-io/github-action@v6
         with:
